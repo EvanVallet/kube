@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/root_password
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: user
+      MYSQL_PASSWORD_FILE: /run/secrets/user_password
+    secrets:
+      - root_password
+      - user_password
+    volumes:
+      - db_data:/var/lib/mysql
+
+secrets:
+  root_password:
+    file: ./secrets/root_password.txt
+  user_password:
+    file: ./secrets/user_password.txt
+
+volumes:
+  db_data:
+
