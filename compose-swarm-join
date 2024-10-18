@@ -1,0 +1,31 @@
+Vagrant.configure("2") do |config|
+vmnumber = 2
+config.vm.synced_folder "./allswarm","/allswarm"
+config.vm.define "debianswarmmaster" do |master|
+  config.vm.box = "bento/debian-12.6"
+  config.vm.box_version = "202407.22.0"
+  master.vm.hostname = "debiansarmmaster"
+  master.vm.network "private_network", ip: "192.168.56.101"
+
+  master.vm.provision "shell",inline: <<-SHELL
+    apt-get update
+    apt-get install -y docker.io
+    docker swarm init --advertise-addr=192.168.56.101
+    docker swarm join-token  worker > /allswarm/token.txt
+  SHELL
+
+end
+        (1..vmnumber).each do | i |
+                 config.vm.define "debianswarmslave#{i}" do |master|
+                        config.vm.box = "bento/debian-12.6"
+                        config.vm.box_version = "202407.22.0"
+                        master.vm.hostname = "debiamswarmslave#{i}"
+                        master.vm.provision "shell", inline: <<-SHELL
+                                apt-get update
+                                apt-get install -y docker.io
+                                allswarm/token.txt
+                        SHELL
+                        master.vm.network "private_network", ip: "192.168.56.10#{i+1}"
+                        end
+        end
+end
